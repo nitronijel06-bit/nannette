@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nannette · The Truth Hurts</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=Montserrat:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #050d1a;
+    --navy-mid: #0a1628;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a3;
+    --gold-dark: #8a6a20;
+    --white: #f5f0ea;
+    --silver: #c8c8d0;
+  }
+
+  html, body {
+    width: 100%; min-height: 100vh;
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* VIDEO BACKGROUND */
+  .video-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .video-bg video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.35;
+  }
+  .video-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(5,13,26,0.55) 0%,
+      rgba(5,13,26,0.3) 40%,
+      rgba(5,13,26,0.65) 100%
+    );
+  }
+
+  /* GRAIN TEXTURE */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 128px;
+  }
+
+  /* FLOATING DIAMONDS */
+  .diamonds {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .diamond {
+    position: absolute;
+    width: 6px; height: 6px;
+    border: 1px solid var(--gold);
+    transform: rotate(45deg);
+    opacity: 0;
+    animation: floatUp linear infinite;
+  }
+  .diamond:nth-child(1)  { left: 10%; animation-duration: 12s; animation-delay: 0s;   width: 5px; height: 5px; }
+  .diamond:nth-child(2)  { left: 25%; animation-duration: 15s; animation-delay: 3s;   opacity: 0.4; }
+  .diamond:nth-child(3)  { left: 40%; animation-duration: 10s; animation-delay: 1s;   width: 4px; height: 4px; }
+  .diamond:nth-child(4)  { left: 55%; animation-duration: 14s; animation-delay: 5s;   }
+  .diamond:nth-child(5)  { left: 70%; animation-duration: 11s; animation-delay: 2s;   width: 8px; height: 8px; }
+  .diamond:nth-child(6)  { left: 85%; animation-duration: 16s; animation-delay: 7s;   width: 4px; height: 4px; }
+  .diamond:nth-child(7)  { left: 18%; animation-duration: 13s; animation-delay: 9s;   }
+  .diamond:nth-child(8)  { left: 62%; animation-duration: 9s;  animation-delay: 4s;   width: 5px; height: 5px; }
+  .diamond:nth-child(9)  { left: 78%; animation-duration: 17s; animation-delay: 6s;   }
+  .diamond:nth-child(10) { left: 92%; animation-duration: 12s; animation-delay: 11s;  width: 6px; height: 6px; }
+
+  @keyframes floatUp {
+    0%   { transform: rotate(45deg) translateY(0);   opacity: 0; bottom: -20px; }
+    10%  { opacity: 0.5; }
+    90%  { opacity: 0.3; }
+    100% { transform: rotate(45deg) translateY(-100vh); opacity: 0; bottom: 100vh; }
+  }
+
+  /* NFC RIPPLE */
+  .nfc-ripple {
+    position: fixed;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ripple-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    animation: rippleOut 2s ease-out forwards;
+  }
+  .ripple-ring:nth-child(1) { width: 80px;  height: 80px;  animation-delay: 0s; }
+  .ripple-ring:nth-child(2) { width: 150px; height: 150px; animation-delay: 0.3s; }
+  .ripple-ring:nth-child(3) { width: 250px; height: 250px; animation-delay: 0.6s; }
+  @keyframes rippleOut {
+    0%   { opacity: 0.8; transform: scale(0.5); }
+    100% { opacity: 0;   transform: scale(1); }
+  }
+
+  /* MAIN CONTENT */
+  .page {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px 80px;
+  }
+
+  /* HEADER */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.4s;
+  }
+  .eyebrow-line {
+    width: 40px; height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold));
+  }
+  .eyebrow-line.right {
+    background: linear-gradient(to left, transparent, var(--gold));
+  }
+  .eyebrow span {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .eyebrow-diamond {
+    width: 5px; height: 5px;
+    border: 1px solid var(--gold);
+    transform: rotate(45deg);
+    display: inline-block;
+  }
+
+  /* NAME */
+  .name-block {
+    text-align: center;
+    margin-bottom: 8px;
+    opacity: 0;
+    animation: fadeUp 1.1s ease forwards 0.6s;
+  }
+  .name-main {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(64px, 16vw, 110px);
+    font-weight: 300;
+    line-height: 0.9;
+    background: linear-gradient(135deg, #fff 0%, #e8d5a3 40%, #c9a84c 70%, #fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.01em;
+  }
+  .name-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 300;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  /* TAGLINE */
+  .tagline {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.35em;
+    color: rgba(200,200,208,0.6);
+    text-transform: uppercase;
+    margin-top: 20px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.9s;
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+    width: 100%;
+    max-width: 380px;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 1.1s;
+  }
+  .divider-line {
+    flex: 1; height: 1px;
+    background: linear-gradient(to right, transparent, rgba(201,168,76,0.4));
+  }
+  .divider-line.right {
+    background: linear-gradient(to left, transparent, rgba(201,168,76,0.4));
+  }
+  .divider-star {
+    color: var(--gold);
+    font-size: 14px;
+  }
+
+  /* LINKS */
+  .links {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .link-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    text-decoration: none;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+    transition: padding-left 0.3s ease;
+  }
+  .link-item:nth-child(1) { animation-delay: 1.2s; }
+  .link-item:nth-child(2) { animation-delay: 1.35s; }
+  .link-item:nth-child(3) { animation-delay: 1.5s; }
+  .link-item:nth-child(4) { animation-delay: 1.65s; }
+  .link-item:nth-child(5) { animation-delay: 1.8s; }
+
+  .link-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    background: linear-gradient(to right, rgba(201,168,76,0.08), transparent);
+    transition: width 0.4s ease;
+  }
+  .link-item:hover::before { width: 100%; }
+  .link-item:hover { padding-left: 8px; }
+
+  .link-left { display: flex; flex-direction: column; gap: 3px; }
+
+  .link-label {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .link-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .link-name svg {
+    width: 16px; height: 16px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  .link-arrow {
+    font-size: 16px;
+    color: var(--gold);
+    opacity: 0.5;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .link-item:hover .link-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 56px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 2.1s;
+  }
+  .footer-diamond {
+    width: 6px; height: 6px;
+    border: 1px solid rgba(201,168,76,0.4);
+    transform: rotate(45deg);
+    margin: 0 auto 16px;
+  }
+  .footer-text {
+    font-family: 'Cinzel', serif;
+    font-size: 8px;
+    letter-spacing: 0.3em;
+    color: rgba(201,168,76,0.35);
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* CUSTOM CURSOR (desktop) */
+  @media (pointer: fine) {
+    body { cursor: none; }
+    .cursor {
+      position: fixed;
+      width: 8px; height: 8px;
+      background: var(--gold);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.1s ease;
+    }
+    .cursor-ring {
+      position: fixed;
+      width: 28px; height: 28px;
+      border: 1px solid rgba(201,168,76,0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: transform 0.18s ease, width 0.2s, height 0.2s;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Video background -->
+<div class="video-bg">
+  <video autoplay muted loop playsinline>
+    <source src="https://res.cloudinary.com/dovq4n9cp/video/upload/v1776711907/Diamonds_Falling_okuwrd.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- Grain -->
+<div class="grain"></div>
+
+<!-- Floating diamonds -->
+<div class="diamonds">
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+  <div class="diamond"></div>
+</div>
+
+<!-- NFC ripple -->
+<div class="nfc-ripple">
+  <div class="ripple-ring"></div>
+  <div class="ripple-ring"></div>
+  <div class="ripple-ring"></div>
+</div>
+
+<!-- Page content -->
+<div class="page">
+
+  <div class="eyebrow">
+    <div class="eyebrow-line"></div>
+    <span class="eyebrow-diamond"></span>
+    <span>Est. Her Way</span>
+    <span class="eyebrow-diamond"></span>
+    <div class="eyebrow-line right"></div>
+  </div>
+
+  <div class="name-block">
+    <div class="name-main">Nannette</div>
+    <div class="name-sub">thetruth hurts</div>
+  </div>
+
+  <div class="tagline">The Truth &nbsp;·&nbsp; The Energy &nbsp;·&nbsp; The Standard</div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <span class="divider-star">✦</span>
+    <div class="divider-line right"></div>
+  </div>
+
+  <div class="links">
+
+    <!-- Instagram -->
+    <a href="https://www.instagram.com/nannettethetruthhurts" class="link-item" target="_blank">
+      <div class="link-left">
+        <span class="link-label">Follow</span>
+        <span class="link-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+          Instagram
+        </span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <!-- TikTok -->
+    <a href="https://www.tiktok.com/@nannettethetruthhurts" class="link-item" target="_blank">
+      <div class="link-left">
+        <span class="link-label">Watch</span>
+        <span class="link-name">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/>
+          </svg>
+          TikTok
+        </span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <!-- Event -->
+    <a href="https://www.eventbrite.com/e/darn-good-eating-taste-of-music-food-truck-festival-tickets-1986729676945" class="link-item" target="_blank">
+      <div class="link-left">
+        <span class="link-label">Experience</span>
+        <span class="link-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Darn Good Eating
+        </span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <!-- Save Contact -->
+    <a href="#" class="link-item" onclick="saveContact(event)">
+      <div class="link-left">
+        <span class="link-label">Connect</span>
+        <span class="link-name">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Save My Contact
+        </span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    <div class="footer-diamond"></div>
+    <div class="footer-text">Nannette · The Truth Hurts</div>
+  </div>
+
+</div>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  if (cursor && ring) {
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+      setTimeout(() => {
+        ring.style.left = e.clientX + 'px';
+        ring.style.top = e.clientY + 'px';
+      }, 80);
+    });
+  }
+
+  // Save contact (.vcf)
+  function saveContact(e) {
+    e.preventDefault();
+    const vcf = `BEGIN:VCARD
+VERSION:3.0
+FN:Nannette TheTruthHurts
+NICKNAME:nannettethetruthhurts
+URL;type=Instagram:https://www.instagram.com/nannettethetruthhurts
+URL;type=TikTok:https://www.tiktok.com/@nannettethetruthhurts
+END:VCARD`;
+    const blob = new Blob([vcf], { type: 'text/vcard' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Nannette.vcf';
+    a.click();
+  }
+</script>
+</body>
+</html>
